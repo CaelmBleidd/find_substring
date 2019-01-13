@@ -21,7 +21,7 @@
 #include <QWidgetItem>
 #include <QMap>
 #include <QTreeWidget>
-
+#include <QKeyEvent>
 
 namespace Ui {
 class MainWindow;
@@ -34,6 +34,9 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+protected:
+    void keyPressEvent(QKeyEvent *event);
 
 public slots:
 

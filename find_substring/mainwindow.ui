@@ -87,13 +87,6 @@
     <item row="3" column="0">
      <layout class="QHBoxLayout" name="buttonsLayout">
       <item>
-       <widget class="QPushButton" name="actionGo_home">
-        <property name="text">
-         <string>Go home</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="actionIndexing_directory">
         <property name="text">
          <string>Indexing</string>
@@ -101,16 +94,23 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="actionGo_back">
+       <widget class="QPushButton" name="actionCancel">
         <property name="text">
-         <string>Return</string>
+         <string>Stop</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="actionCancel">
+       <widget class="QPushButton" name="actionGo_home">
         <property name="text">
-         <string>Cancel</string>
+         <string>Go home</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="actionGo_back">
+        <property name="text">
+         <string>Go back</string>
         </property>
        </widget>
       </item>

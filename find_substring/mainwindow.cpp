@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->actionCancel, &QPushButton::clicked, this, &MainWindow::cancel);
     connect(ui->actionChoose_directory, &QPushButton::clicked, this, &MainWindow::select_directory);
 
+
     ui->treeWidget->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     ui->treeWidget->header()->setSectionResizeMode(1, QHeaderView::Stretch);
 
@@ -17,6 +18,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 }
 
 MainWindow::~MainWindow() {}
+
+void MainWindow::keyPressEvent(QKeyEvent *event) {
+    if (event->key() == Qt::Key_Return) {
+        show_directory(ui->treeWidget->currentItem()->text(1));
+        return;
+    }
+    if (event->key() == Qt::Key_Backspace) {
+        go_back();
+        return;
+    }
+}
 
 void MainWindow::select_directory() {
     QString dir = QFileDialog::getExistingDirectory(this, "Select directory", QDir::homePath(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
@@ -29,7 +41,6 @@ void MainWindow::select_directory() {
         warning.exec();
     }
 }
-
 
 void MainWindow::show_directory(QString const &dir) {
     ui->treeWidget->clear();
@@ -48,7 +59,6 @@ void MainWindow::show_directory(QString const &dir) {
     ui->treeWidget->sortItems(0, Qt::SortOrder::AscendingOrder);
 }
 
-
 void MainWindow::set_data(QTreeWidgetItem *item, QString const &path) {
     QFileInfo file(path);
 
@@ -60,9 +70,8 @@ void MainWindow::set_data(QTreeWidgetItem *item, QString const &path) {
 }
 
 void MainWindow::indexing() {
-
+    QDir directory = QDir::currentPath();
 }
-
 
 void MainWindow::go_home() {
     QDir::setCurrent(QDir::homePath());
