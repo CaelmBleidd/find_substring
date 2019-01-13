@@ -63,28 +63,10 @@
        <property name="text">
         <string>Filename</string>
        </property>
-       <property name="foreground">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>0</red>
-          <green>0</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </property>
       </column>
       <column>
        <property name="text">
         <string>Path</string>
-       </property>
-       <property name="foreground">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>0</red>
-          <green>0</green>
-          <blue>0</blue>
-         </color>
-        </brush>
        </property>
       </column>
      </widget>
@@ -105,13 +87,6 @@
     <item row="3" column="0">
      <layout class="QHBoxLayout" name="buttonsLayout">
       <item>
-       <widget class="QPushButton" name="actionShow_directory">
-        <property name="text">
-         <string>Show directory</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="actionGo_home">
         <property name="text">
          <string>Go home</string>
@@ -122,13 +97,6 @@
        <widget class="QPushButton" name="actionIndexing_directory">
         <property name="text">
          <string>Indexing</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="actionClear_all">
-        <property name="text">
-         <string>Clear All</string>
         </property>
        </widget>
       </item>
