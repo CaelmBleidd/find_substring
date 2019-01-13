@@ -3,10 +3,10 @@
 
 #include <QObject>
 
-class indexer
+class Indexer
 {
 public:
-    indexer();
+    Indexer();
 };
 
 #endif // INDEXER_H

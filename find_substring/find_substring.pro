@@ -26,10 +26,12 @@ CONFIG += c++14
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    Indexer.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    Indexer.h
 
 FORMS += \
         mainwindow.ui

@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <memory>
 
 namespace Ui {
 class MainWindow;
@@ -16,7 +17,7 @@ public:
     ~MainWindow();
 
 private:
-    Ui::MainWindow *ui;
+    std::unique_ptr<Ui::MainWindow> ui;
 };
 
 #endif // MAINWINDOW_H

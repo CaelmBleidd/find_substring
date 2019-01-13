@@ -1,6 +1,6 @@
-#include "indexer.h"
+#include "Indexer.h"
 
-indexer::indexer()
+Indexer::Indexer()
 {
 
 }
