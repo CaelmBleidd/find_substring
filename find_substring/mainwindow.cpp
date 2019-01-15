@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->actionCancel, &QPushButton::clicked, this, &MainWindow::cancel);
     connect(ui->actionChoose_directory, &QPushButton::clicked, this, &MainWindow::select_directory);
 
+    ui->listView->hide();
 
     ui->treeWidget->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     ui->treeWidget->header()->setSectionResizeMode(1, QHeaderView::Stretch);
@@ -45,8 +46,9 @@ void MainWindow::select_directory() {
 void MainWindow::show_directory(QString const &dir) {
     ui->treeWidget->clear();
 
-    QDirIterator iter(dir, QDir::NoDot | QDir::AllEntries);
     QDir::setCurrent(dir);
+
+    QDirIterator iter(dir, QDir::NoDot | QDir::AllEntries);
 
     setWindowTitle(QDir::currentPath());
 
