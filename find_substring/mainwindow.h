@@ -22,6 +22,12 @@
 #include <QMap>
 #include <QTreeWidget>
 #include <QKeyEvent>
+#include <QDirIterator>
+#include <QVector>
+#include <QThread>
+
+#include "indexer.h"
+#include <indexerthread.h>
 
 namespace Ui {
 class MainWindow;
@@ -43,9 +49,13 @@ public slots:
 private:
     std::unique_ptr<Ui::MainWindow> ui;
     QDir actual_directory;
+    QVector<Indexer> files;
+
     void set_data(QTreeWidgetItem*, QString const&);
     void show_directory(QString const&);
+    void process_indexing();
 
+    QThread *thread = nullptr;
 
 private slots:
     void select_directory();
@@ -53,6 +63,8 @@ private slots:
     void go_home();
     void go_back();
     void cancel();
+
+
 
 
 };

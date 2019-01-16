@@ -28,12 +28,14 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     Indexer.cpp \
-    searcher.cpp
+    searcher.cpp \
+    indexerthread.cpp
 
 HEADERS += \
         mainwindow.h \
     Indexer.h \
-    searcher.h
+    searcher.h \
+    indexerthread.h
 
 FORMS += \
         mainwindow.ui

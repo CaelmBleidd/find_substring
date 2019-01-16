@@ -72,7 +72,21 @@ void MainWindow::set_data(QTreeWidgetItem *item, QString const &path) {
 }
 
 void MainWindow::indexing() {
-    QDir directory = QDir::currentPath();
+    IndexerThread *indexer_thread = new IndexerThread(QDir::currentPath());
+    thread = new QThread();
+    indexer_thread->moveToThread(thread);
+
+    connect(thread, SIGNAL(started()), indexer_thread, SLOT(process()));
+
+    connect(indexer_thread, SIGNAL(finished()), thread, SLOT(quit()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    connect(indexer_thread, SIGNAL(finished()), indexer_thread, SLOT(deleteLater()));
+
+    thread->start();
+}
+
+void MainWindow::process_indexing() {
+
 }
 
 void MainWindow::go_home() {
@@ -86,5 +100,7 @@ void MainWindow::go_back() {
 }
 
 void MainWindow::cancel() {
-
+    if (thread!=nullptr) {
+        thread->requestInterruption();
+    }
 }

@@ -6,6 +6,8 @@
 #include <QFileInfo>
 #include <QDebug>
 #include <QTextStream>
+#include <string>
+#include <fstream>
 
 class Indexer {
 public:
@@ -18,12 +20,12 @@ public:
 
     void process();
     bool is_text();
+    QString get_file_name();
 
 public slots:
 
 
 private:
-    bool was_indexed;
     bool indexing; 
     bool is_ok;
     QString file_path;
@@ -31,12 +33,11 @@ private:
     QVector<uint32_t> trigrams;
     
 
-    void make_trigrams_set(QSet<uint32_t> &, QString const&, qint64);
+    bool make_trigrams_set(QSet<uint32_t> &, std::string const&, size_t);
     void print_error(QString const &error);
-    bool is_valid_utf8(const uint8_t* to_check, qint64 length);
+    bool is_valid_utf8(const uint8_t* to_check, size_t length);
 
 private slots:
-
 
 signals:
 

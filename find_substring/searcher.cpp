@@ -1,6 +1,3 @@
 #include "searcher.h"
 
-Searcher::Searcher()
-{
-
-}
+Searcher::Searcher() {}
