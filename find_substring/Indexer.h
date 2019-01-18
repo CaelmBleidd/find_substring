@@ -1,6 +1,9 @@
 #ifndef INDEXER_H
 #define INDEXER_H
 
+//#define QT_NO_DEBUG_OUTPUT
+
+#include <QTime>
 #include <QObject>
 #include <QVector>
 #include <QFileInfo>
@@ -31,11 +34,12 @@ public slots:
 
 
 private:
-    bool indexing; 
+    bool indexing;
     bool is_ok;
     QString file_path;
     QFileInfo file_info;
-    
+
+    QTime timer;
 
     bool make_trigrams_set(QSet<uint32_t> &, std::string const&, size_t);
     void print_error(QString const &error);

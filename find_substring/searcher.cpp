@@ -5,12 +5,12 @@ Searcher::Searcher(std::string const &pattern) : pattern(pattern) {}
 bool Searcher::process(Indexer &file) {
     size_t length = pattern.length();
     uint8_t symbols[length];
-    for (auto i = 0; i < length; ++i) {
+    for (size_t i = 0; i < length; ++i) {
         symbols[i] = static_cast<uint8_t>(pattern[i]);
     }
 
     uint32_t trigram = 0 | (symbols[0] << 8) | symbols[1];
-    for (auto i = 2; i < length; ++i) {
+    for (size_t i = 2; i < length; ++i) {
         trigram <<= 8;
         trigram |= symbols[i];
         pattern_trigrams.insert(trigram & 0xFFFFFF);
@@ -38,9 +38,7 @@ bool Searcher::find_substring(QString const &file_path) {
         qDebug() << QString("File %1 can't be opened").arg(file_path);
         return false;
     }
-
-    QTextStream in(&file);
-    while (!in.atEnd()) {
+    while (!file.atEnd()) {
 //            std::string line = in.read(4194304).toStdString(); // 4 * 1024 * 1024
 
 
@@ -53,7 +51,7 @@ bool Searcher::find_substring(QString const &file_path) {
 
 //            auto q_line = QString().fromStdString(line);
 
-        QString q_line = in.read(4194304);
+        QString q_line = file.read(4194304);
         if (q_line.indexOf(QString().fromStdString(pattern)) > 0)
             return true;
     }

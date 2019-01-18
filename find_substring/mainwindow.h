@@ -1,6 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+//#define QT_NO_DEBUG_OUTPUT
+
+
 #include <QMainWindow>
 #include <QDir>
 #include <memory>
@@ -15,17 +18,14 @@
 #include <QFileSystemModel>
 #include <QCryptographicHash>
 #include <QIODevice>
-#include <QMainWindow>
-#include <memory>
-#include <QDir>
 #include <QWidgetItem>
 #include <QMap>
 #include <QTreeWidget>
 #include <QKeyEvent>
-#include <QDirIterator>
 #include <QVector>
 #include <QThread>
 #include <QtConcurrent/QtConcurrent>
+#include <QTimer>
 
 #include "indexer.h"
 #include <indexerthread.h>
@@ -80,6 +80,8 @@ private:
     void show_pattern_in_file();
 
     QString last_clicked_path;
+
+    QTime timer;
 
 
 private slots:

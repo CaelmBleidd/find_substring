@@ -1,6 +1,9 @@
 #ifndef SEARCHER_H
 #define SEARCHER_H
 
+#define QT_NO_DEBUG_OUTPUT
+
+
 #include <QObject>
 #include <QSet>
 #include <string>

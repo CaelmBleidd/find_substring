@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     qRegisterMetaType<Indexer>("Indexer");
 
+
     connect(ui->actionIndexing_directory, &QPushButton::clicked, this, &MainWindow::indexing);
     connect(ui->actionGo_home, &QPushButton::clicked, this, &MainWindow::go_home);
     connect(ui->actionGo_back, &QPushButton::clicked, this, &MainWindow::go_back);
@@ -26,18 +27,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->progressBar->setValue(0);
     ui->progressBar->setMinimum(0);
 
-    ui->listWidget->setStyleSheet("QListWidget { color: black }");
+    ui->listWidget->setStyleSheet("QListWidget { color: black ; background-color: white }" );
     ui->listWidget->hide();
 
-    ui->textEdit->setStyleSheet("QTextEdit { color: black }");
+    ui->textEdit->setStyleSheet("QTextEdit  { color: black ; background-color: white }");
     ui->textEdit->hide();
 
     ui->patternLine->setDisabled(true);
 
-    ui->patternLine->setStyleSheet("QLineEdit { color: black }");
+    ui->patternLine->setStyleSheet("QLineEdit  { color: black ; background-color: white }");
 
 
-    ui->treeWidget->setStyleSheet("QTreeWidget { color: black }");
+    ui->treeWidget->setStyleSheet("QTreeWidget  { color: black ; background-color: white }");
 
     ui->treeWidget->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     ui->treeWidget->header()->setSectionResizeMode(1, QHeaderView::Stretch);
@@ -93,14 +94,21 @@ void MainWindow::pattern_line_has_changed() {
         return;
     }
 
+    if (!ui->textEdit->isHidden())  {
+        ui->textEdit->clear();
+        ui->textEdit->hide();
+    }
+
     ui->listWidget->clear();
 
     pattern = ui->patternLine->text().toStdString();
 
     if (pattern.empty()) {
+
         for (auto &file: text_files) {
             ui->listWidget->addItem(file.get_file_name());
         }
+
     }
 
     if (pattern.size() < 3) return;
@@ -239,11 +247,14 @@ void MainWindow::indexing() {
     connect(indexer_thread, SIGNAL(finished()), indexer_thread, SLOT(deleteLater()));
 
     indexing_in_process = true;
+    timer.start();
     thread_for_indexing->start();
 }
 
 
 void MainWindow::after_indexing(QVector <Indexer> files) {
+    auto time = timer.elapsed() / 1000.0;
+
     text_files = std::move(files);
 
     indexing_in_process = false;
@@ -265,9 +276,13 @@ void MainWindow::after_indexing(QVector <Indexer> files) {
     ui->patternLine->setEnabled(true);
 
 
+
     for (auto &file: text_files) {
         ui->listWidget->addItem(file.get_file_name());
     }
+
+    QMessageBox::information(this, "Result", QString("%1 text files found in %2 seconds").arg(text_files.size()).arg(time), QMessageBox::Ok);
+
 }
 
 void MainWindow::go_home() {
@@ -341,7 +356,7 @@ void MainWindow::show_pattern_in_file() {
         QMessageBox::information(this, "Warning", QString("File %1 too large for opening").arg(file.fileName()),
                                  QMessageBox::Ok); // заглушка
     } else {
-        ui->textEdit->setText(file.readAll());
+        ui->textEdit->setPlainText(file.readAll());
 
         QTextCursor cursor(ui->textEdit->document());
         QTextCharFormat char_format;
@@ -354,6 +369,7 @@ void MainWindow::show_pattern_in_file() {
         while (true) {
             from = text.indexOf(pattern, from + 1);
             if (from > 0) {
+                ui->textEdit->setFocus();
                 cursor.setPosition(from);
                 cursor.setPosition(from + pattern.length(), QTextCursor::KeepAnchor);
                 cursor.setCharFormat(char_format);
@@ -362,7 +378,6 @@ void MainWindow::show_pattern_in_file() {
             }
         }
     }
-
     ui->textEdit->show();
 }
 

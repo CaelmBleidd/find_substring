@@ -1,8 +1,8 @@
 #include "indexer.h"
 
-Indexer::Indexer(): indexing(false), is_ok(false) {}
+Indexer::Indexer() : indexing(false), is_ok(false) {}
 
-Indexer::Indexer(const QString &file_path): indexing(false), is_ok(false), file_path(file_path) {
+Indexer::Indexer(const QString &file_path) : indexing(false), is_ok(false), file_path(file_path) {
     file_info = QFileInfo(file_path);
 }
 
@@ -13,22 +13,24 @@ Indexer::~Indexer() {
 void Indexer::process() {
     indexing = true;
 
+    timer.start();
+
     if (file_info.size() > MAX_FILE_SIZE) {
         print_error(QString("Too large file %1").arg(file_info.fileName()));
         return;
     }
-    
+
 //    QFile file(file_path);
-    
+
 //    if (!file.open(QIODevice::ReadOnly)) {
 //        print_error(QString("File %1 can't be opened").arg(file_info.fileName()));
 //        return;
 //    }
-    
+
 //    QTextStream in(&file);
 
     std::ifstream in(file_path.toStdString());
-    QSet<uint32_t> trigrams_set;
+    QSet <uint32_t> trigrams_set;
     std::string line;
 
     if (!in) {
@@ -60,18 +62,20 @@ void Indexer::process() {
             print_error(QString("%1 contains too many trigrams").arg(file_info.fileName()));
             return;
         }
+
     }
 
     trigrams.clear();
     std::move(trigrams_set.begin(), trigrams_set.end(), std::back_inserter(trigrams));
+
     std::sort(trigrams.begin(), trigrams.end());
     is_ok = true;
 }
 
-bool Indexer::make_trigrams_set(QSet<uint32_t> &trigrams_set, std::string const &line, size_t length) {
+ bool Indexer::make_trigrams_set(QSet <uint32_t> &trigrams_set, std::string const &line, size_t length) {
     auto std_line = line;
     uint8_t symbols[length];
-    for (auto i = 0; i < length; ++i) {
+    for (size_t i = 0; i < length; ++i) {
         symbols[i] = static_cast<uint8_t>(std_line[i]);
     }
     if (!is_valid_utf8(symbols, length)) {
@@ -80,7 +84,7 @@ bool Indexer::make_trigrams_set(QSet<uint32_t> &trigrams_set, std::string const 
     }
 
     uint32_t trigram = 0 | (symbols[0] << 8) | symbols[1];
-    for (auto i = 2; i < length; ++i) {
+    for (size_t i = 2; i < length; ++i) {
         trigram <<= 8;
         trigram |= symbols[i];
         trigrams_set.insert(trigram & 0xFFFFFF);
@@ -88,7 +92,7 @@ bool Indexer::make_trigrams_set(QSet<uint32_t> &trigrams_set, std::string const 
     return true;
 }
 
-bool Indexer::is_valid_utf8(const uint8_t *to_check, size_t length) {
+ bool Indexer::is_valid_utf8(const uint8_t *to_check, size_t length) {
     size_t n = 0;
     for (size_t i = 0; i < length; i++) {
         if (to_check[i] <= 0x7f) {
@@ -97,19 +101,16 @@ bool Indexer::is_valid_utf8(const uint8_t *to_check, size_t length) {
             n = 1;
         } else if ((to_check[i] == 0xED) && ((to_check[i + 1] & 0xA0) == 0xA0)) {
             //invalid U+D800 - U+DFFF
-            qDebug() << i << " " << to_check[i] << ' ' << 0;
             return false;
-        } else if((to_check[i] & 0xF0) == 0xE0) {
+        } else if ((to_check[i] & 0xF0) == 0xE0) {
             n = 2;
         } else if ((to_check[i] & 0xF8) == 0xF0) {
             n = 3;
         } else {
-            qDebug() << i << " " << to_check[i] << ' ' << 1;
             return false;
         }
         for (size_t j = 0; j < n && j < length; j++) {
             if (++i == length || (to_check[i] & 0xC0) != 0x80) {
-                qDebug() << i << j << " " << to_check[i] << ' ' << 2;
                 return false;
             }
         }
@@ -125,11 +126,9 @@ QString Indexer::get_file_name() const {
     return file_info.fileName();
 }
 
-QString Indexer::get_file_path() const
-{
+QString Indexer::get_file_path() const {
     return file_path;
 }
-
 
 
 void Indexer::print_error(const QString &error) {

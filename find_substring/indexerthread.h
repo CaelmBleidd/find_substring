@@ -1,6 +1,9 @@
 #ifndef INDEXERTHREAD_H
 #define INDEXERTHREAD_H
 
+//#define QT_NO_DEBUG_OUTPUT
+
+#include <QTime>
 #include <QObject>
 #include <QDir>
 #include <QVector>
