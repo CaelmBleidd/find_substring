@@ -1,6 +1,6 @@
 #include "searcher.h"
 
-Searcher::Searcher(std::string const& pattern): pattern(pattern) {}
+Searcher::Searcher(std::string const &pattern) : pattern(pattern) {}
 
 bool Searcher::process(Indexer &file) {
     size_t length = pattern.length();
@@ -32,15 +32,15 @@ bool Searcher::process(Indexer &file) {
 
 bool Searcher::find_substring(QString const &file_path) {
 
-        QFile file(file_path);
+    QFile file(file_path);
 
-        if (!file.open(QIODevice::ReadOnly)) {
-            qDebug() << QString("File %1 can't be opened").arg(file_path);
-            return false;
-        }
+    if (!file.open(QIODevice::ReadOnly)) {
+        qDebug() << QString("File %1 can't be opened").arg(file_path);
+        return false;
+    }
 
-        QTextStream in(&file);
-        while (!in.atEnd()) {
+    QTextStream in(&file);
+    while (!in.atEnd()) {
 //            std::string line = in.read(4194304).toStdString(); // 4 * 1024 * 1024
 
 
@@ -53,10 +53,10 @@ bool Searcher::find_substring(QString const &file_path) {
 
 //            auto q_line = QString().fromStdString(line);
 
-            QString q_line = in.read(4194304);
-            if (q_line.indexOf(QString().fromStdString(pattern)) > 0)
-                return true;
-        }
-        return false;
+        QString q_line = in.read(4194304);
+        if (q_line.indexOf(QString().fromStdString(pattern)) > 0)
+            return true;
+    }
+    return false;
 
 }

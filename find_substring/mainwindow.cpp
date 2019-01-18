@@ -2,7 +2,8 @@
 #include "ui_mainwindow.h"
 #include <searcher.h>
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), watcher_for_search(new QFutureWatcher<void>(this)), already_indexed(false),
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow),
+                                          watcher_for_search(new QFutureWatcher<void>(this)), already_indexed(false),
                                           break_search(false), indexing_in_process(false) {
 
     ui->setupUi(this);
@@ -47,9 +48,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 MainWindow::~MainWindow() {}
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
-    if (event->key() == Qt::Key_Return && !ui->treeWidget->isHidden() && (ui->treeWidget->selectedItems().size() != 0)) {
+    if (event->key() == Qt::Key_Return && !ui->treeWidget->isHidden() &&
+        (ui->treeWidget->selectedItems().size() != 0)) {
 
-        if (indexing_in_process && QMessageBox::question(this, "Attention", "Abort indexing?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+        if (indexing_in_process &&
+            QMessageBox::question(this, "Attention", "Abort indexing?", QMessageBox::Yes | QMessageBox::No) ==
+            QMessageBox::No) {
             return;
         }
 
@@ -57,9 +61,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
 
         auto path = ui->treeWidget->currentItem()->text(1);
         auto dir = QFileInfo(path);
-        if (dir.isDir())
+        if (dir.isDir()) {
             QDir::setCurrent(path);
             show_directory(dir.filePath());
+        }
         return;
     }
 
@@ -92,7 +97,7 @@ void MainWindow::pattern_line_has_changed() {
 
     pattern = ui->patternLine->text().toStdString();
 
-    if(pattern.empty()) {
+    if (pattern.empty()) {
         for (auto &file: text_files) {
             ui->listWidget->addItem(file.get_file_name());
         }
@@ -132,7 +137,8 @@ void MainWindow::search_pattern() {
 
 void MainWindow::select_directory() {
     already_indexed = false;
-    QString dir = QFileDialog::getExistingDirectory(this, "Select directory", QDir::homePath(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    QString dir = QFileDialog::getExistingDirectory(this, "Select directory", QDir::homePath(),
+                                                    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if (!dir.isEmpty()) {
         MainWindow::show_directory(dir);
     } else {
@@ -206,20 +212,20 @@ void MainWindow::indexing() {
     ui->actionIndexing_directory->setDisabled(true);
 
 
-
     IndexerThread *indexer_thread = new IndexerThread(QDir::currentPath());
     thread_for_indexing = new QThread();
     indexer_thread->moveToThread(thread_for_indexing);
 
     connect(thread_for_indexing, SIGNAL(started()), indexer_thread, SLOT(process()));
 
-    qRegisterMetaType<QVector<Indexer>>("QVector<Indexer>");
-    connect(indexer_thread, SIGNAL(show_files(QVector<Indexer>)), this, SLOT(after_indexing(QVector<Indexer>)));
+    qRegisterMetaType < QVector < Indexer >> ("QVector<Indexer>");
+    connect(indexer_thread, SIGNAL(show_files(QVector < Indexer > )), this, SLOT(after_indexing(QVector < Indexer > )));
 
     ui->actionCancel->setEnabled(true);
 
     qRegisterMetaType<qint64>("qint64");
-    connect(indexer_thread, SIGNAL(change_progress_max_value(qint64)), this, SLOT(change_max_value_progress_bar(qint64)));
+    connect(indexer_thread, SIGNAL(change_progress_max_value(qint64)), this,
+            SLOT(change_max_value_progress_bar(qint64)));
     connect(indexer_thread, SIGNAL(increase_progress_bar_status()), this, SLOT(increase_progress_bar_value()));
 
 //            void change_progress_max_value(qint64);
@@ -237,8 +243,7 @@ void MainWindow::indexing() {
 }
 
 
-
-void MainWindow::after_indexing(QVector<Indexer> files) {
+void MainWindow::after_indexing(QVector <Indexer> files) {
     text_files = std::move(files);
 
     indexing_in_process = false;
@@ -260,14 +265,15 @@ void MainWindow::after_indexing(QVector<Indexer> files) {
     ui->patternLine->setEnabled(true);
 
 
-
     for (auto &file: text_files) {
         ui->listWidget->addItem(file.get_file_name());
     }
 }
 
 void MainWindow::go_home() {
-    if (indexing_in_process && QMessageBox::question(this, "Attention", "Abort indexing?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+    if (indexing_in_process &&
+        QMessageBox::question(this, "Attention", "Abort indexing?", QMessageBox::Yes | QMessageBox::No) ==
+        QMessageBox::No) {
         return;
     }
     already_indexed = false;
@@ -278,7 +284,9 @@ void MainWindow::go_home() {
 
 
 void MainWindow::go_back() {
-    if (indexing_in_process && QMessageBox::question(this, "Attention", "Abort indexing?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+    if (indexing_in_process &&
+        QMessageBox::question(this, "Attention", "Abort indexing?", QMessageBox::Yes | QMessageBox::No) ==
+        QMessageBox::No) {
         return;
     }
     already_indexed = false;
@@ -313,8 +321,7 @@ void MainWindow::show_pattern_in_file() {
     }
 
 
-
-     last_clicked_path = ui->listWidget->currentItem()->text();
+    last_clicked_path = ui->listWidget->currentItem()->text();
 
     if (watcher_for_search->isRunning())
         return;
@@ -325,12 +332,14 @@ void MainWindow::show_pattern_in_file() {
     QFile file(last_clicked_path);
 
     if (!file.open(QIODevice::ReadOnly)) {
-        QMessageBox::information(this, "Warning", QString("File %1 can't be opened").arg(file.fileName()), QMessageBox::Ok);
+        QMessageBox::information(this, "Warning", QString("File %1 can't be opened").arg(file.fileName()),
+                                 QMessageBox::Ok);
         return;
     }
 
     if (file.size() > MAX_FILE_SIZE) {
-        QMessageBox::information(this, "Warning", QString("File %1 too large for opening").arg(file.fileName()), QMessageBox::Ok); // заглушка
+        QMessageBox::information(this, "Warning", QString("File %1 too large for opening").arg(file.fileName()),
+                                 QMessageBox::Ok); // заглушка
     } else {
         ui->textEdit->setText(file.readAll());
 
@@ -358,7 +367,9 @@ void MainWindow::show_pattern_in_file() {
 }
 
 void MainWindow::double_tree_item_clicked() {
-    if (indexing_in_process && QMessageBox::question(this, "Attention", "Abort indexing?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+    if (indexing_in_process &&
+        QMessageBox::question(this, "Attention", "Abort indexing?", QMessageBox::Yes | QMessageBox::No) ==
+        QMessageBox::No) {
         return;
     }
 
@@ -366,8 +377,9 @@ void MainWindow::double_tree_item_clicked() {
 
     auto path = ui->treeWidget->currentItem()->text(1);
     auto dir = QFileInfo(path);
-    if (dir.isDir())
+    if (dir.isDir()) {
         QDir::setCurrent(path);
         show_directory(dir.filePath());
+    }
     return;
 }
