@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QDirIterator>
 #include <QThread>
+#include <algorithm>
 
 #include "indexer.h"
 
@@ -14,6 +15,7 @@ class IndexerThread: public QObject {
 
 public:
     IndexerThread(QString const&);
+    ~IndexerThread();
 
 public slots:
     void process();
@@ -23,7 +25,9 @@ private:
     QVector<Indexer> files;
 
 signals:
+    void show_files(QVector<Indexer>);
     void finished();
+    void show_home();
 };
 
 #endif // INDEXERTHREAD_H

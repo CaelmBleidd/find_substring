@@ -2,12 +2,13 @@
 #define INDEXER_H
 
 #include <QObject>
-#include <Qvector>
+#include <QVector>
 #include <QFileInfo>
 #include <QDebug>
 #include <QTextStream>
 #include <string>
 #include <fstream>
+#include <QThread>
 
 class Indexer {
 public:
@@ -18,9 +19,13 @@ public:
     Indexer();
     Indexer(QString const &file_path);
 
+    ~Indexer();
+
     void process();
-    bool is_text();
-    QString get_file_name();
+    bool is_text() const;
+    QString get_file_name() const;
+    QString get_file_path() const;
+    QVector<uint32_t> trigrams;
 
 public slots:
 
@@ -30,7 +35,6 @@ private:
     bool is_ok;
     QString file_path;
     QFileInfo file_info;
-    QVector<uint32_t> trigrams;
     
 
     bool make_trigrams_set(QSet<uint32_t> &, std::string const&, size_t);

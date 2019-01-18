@@ -1,9 +1,13 @@
-#include "Indexer.h"
+#include "indexer.h"
 
 Indexer::Indexer(): indexing(false), is_ok(false) {}
 
 Indexer::Indexer(const QString &file_path): indexing(false), is_ok(false), file_path(file_path) {
     file_info = QFileInfo(file_path);
+}
+
+Indexer::~Indexer() {
+    trigrams.clear();
 }
 
 void Indexer::process() {
@@ -33,6 +37,9 @@ void Indexer::process() {
     }
 
     while (!in.eof()) {
+
+        if (QThread::currentThread()->isInterruptionRequested()) break;
+
         std::getline(in, line);
 //        auto line = in.readLine().toUtf8();
         auto line_length = line.length();
@@ -71,6 +78,7 @@ bool Indexer::make_trigrams_set(QSet<uint32_t> &trigrams_set, std::string const 
         qDebug() << QString::fromStdString(line);
         return false;
     }
+
     uint32_t trigram = 0 | (symbols[0] << 8) | symbols[1];
     for (auto i = 2; i < length; ++i) {
         trigram <<= 8;
@@ -109,12 +117,17 @@ bool Indexer::is_valid_utf8(const uint8_t *to_check, size_t length) {
     return true;
 }
 
-bool Indexer::is_text() {
+bool Indexer::is_text() const {
     return indexing && is_ok;
 }
 
-QString Indexer::get_file_name() {
+QString Indexer::get_file_name() const {
     return file_info.fileName();
+}
+
+QString Indexer::get_file_path() const
+{
+    return file_path;
 }
 
 

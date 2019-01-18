@@ -25,6 +25,7 @@
 #include <QDirIterator>
 #include <QVector>
 #include <QThread>
+#include <QtConcurrent/QtConcurrent>
 
 #include "indexer.h"
 #include <indexerthread.h>
@@ -41,31 +42,47 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    std::atomic_bool break_search;
+    std::atomic_bool indexing_in_process;
+    std::atomic_bool already_indexed;
+
 protected:
     void keyPressEvent(QKeyEvent *event);
 
 public slots:
+    void after_indexing(QVector<Indexer>);
+    void show_file(Indexer const &);
+    void go_home();
+    void show_current_directory();
 
 private:
     std::unique_ptr<Ui::MainWindow> ui;
     QDir actual_directory;
-    QVector<Indexer> files;
+    QVector<Indexer> text_files;
+
+    std::string pattern;
 
     void set_data(QTreeWidgetItem*, QString const&);
     void show_directory(QString const&);
-    void process_indexing();
 
-    QThread *thread = nullptr;
+    QThread *thread_for_indexing = nullptr;
+
+    QFutureWatcher<void>* watcher_for_search;
+
+    void search_pattern();
 
 private slots:
     void select_directory();
     void indexing();
-    void go_home();
     void go_back();
     void cancel();
+    void pattern_line_has_changed();
+
+    void stop_searching();
 
 
-
+signals:
+    void add_file(Indexer const&);
 
 };
 
