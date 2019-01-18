@@ -31,6 +31,7 @@ bool Searcher::process(Indexer &file) {
 }
 
 bool Searcher::find_substring(QString const &file_path) {
+
         QFile file(file_path);
 
         if (!file.open(QIODevice::ReadOnly)) {
@@ -40,7 +41,7 @@ bool Searcher::find_substring(QString const &file_path) {
 
         QTextStream in(&file);
         while (!in.atEnd()) {
-            std::string line = in.read(4194304).toStdString(); // 4 * 1024 * 1024
+//            std::string line = in.read(4194304).toStdString(); // 4 * 1024 * 1024
 
 
 //            auto it = std::search(line.begin(), line.end(), std::boyer_moore_horspool_searcher(pattern.begin(), pattern.end()));
@@ -50,7 +51,9 @@ bool Searcher::find_substring(QString const &file_path) {
 //            }
 
 
-            auto q_line = QString().fromStdString(line);
+//            auto q_line = QString().fromStdString(line);
+
+            QString q_line = in.read(4194304);
             if (q_line.indexOf(QString().fromStdString(pattern)) > 0)
                 return true;
         }

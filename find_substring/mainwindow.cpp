@@ -15,6 +15,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->actionCancel, &QPushButton::clicked, this, &MainWindow::cancel);
     connect(ui->actionChoose_directory, &QPushButton::clicked, this, &MainWindow::select_directory);
 
+    connect(ui->listWidget, &QListWidget::itemDoubleClicked, this, &MainWindow::show_pattern_in_file);
+    connect(ui->treeWidget, &QTreeWidget::itemDoubleClicked, this, &MainWindow::double_tree_item_clicked);
+
     connect(this, SIGNAL(add_file(Indexer const&)), this, SLOT(show_file(Indexer const&)));
 
     connect(ui->patternLine, &QLineEdit::textChanged, this, &MainWindow::pattern_line_has_changed);
@@ -24,6 +27,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     ui->listWidget->setStyleSheet("QListWidget { color: black }");
     ui->listWidget->hide();
+
+    ui->textEdit->setStyleSheet("QTextEdit { color: black }");
+    ui->textEdit->hide();
 
     ui->patternLine->setDisabled(true);
 
@@ -41,7 +47,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 MainWindow::~MainWindow() {}
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
-    if (event->key() == Qt::Key_Return && !ui->treeWidget->isHidden() && !(ui->treeWidget->selectedItems().size() == 0)) {
+    if (event->key() == Qt::Key_Return && !ui->treeWidget->isHidden() && (ui->treeWidget->selectedItems().size() != 0)) {
+
         if (indexing_in_process && QMessageBox::question(this, "Attention", "Abort indexing?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
             return;
         }
@@ -51,16 +58,28 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         auto path = ui->treeWidget->currentItem()->text(1);
         auto dir = QFileInfo(path);
         if (dir.isDir())
+            QDir::setCurrent(path);
             show_directory(dir.filePath());
         return;
     }
+
+    if (event->key() == Qt::Key_Return && !ui->listWidget->isHidden() && ui->listWidget->selectedItems().size() != 0) {
+        show_pattern_in_file();
+    }
+
     if (event->key() == Qt::Key_Backspace && !ui->treeWidget->isHidden()) {
         go_back();
         return;
     }
-    if (event->key() == Qt::Key_Escape) {
+    if (event->key() == Qt::Key_Escape && ui->listWidget->isHidden()) {
         cancel();
         return;
+    }
+
+    if (event->key() == Qt::Key_Escape && !ui->listWidget->isHidden() && !ui->textEdit->isHidden()) {
+        ui->textEdit->clear();
+        ui->textEdit->hide();
+        last_clicked_path = "";
     }
 }
 
@@ -93,7 +112,7 @@ void MainWindow::pattern_line_has_changed() {
 
 
 void MainWindow::show_file(Indexer const &file) {
-    ui->listWidget->addItem(QString("Name: %1; Path: %2").arg(file.get_file_name()).arg(file.get_file_path()));
+    ui->listWidget->addItem(file.get_file_path());
 }
 
 void MainWindow::search_pattern() {
@@ -109,6 +128,7 @@ void MainWindow::search_pattern() {
         }
     }
 }
+
 
 void MainWindow::select_directory() {
     already_indexed = false;
@@ -221,22 +241,29 @@ void MainWindow::indexing() {
 void MainWindow::after_indexing(QVector<Indexer> files) {
     text_files = std::move(files);
 
-    ui->treeWidget->clear();
-    ui->treeWidget->hide();
-    ui->listWidget->show();
-
     indexing_in_process = false;
     already_indexed = true;
-
-    ui->patternLine->setEnabled(true);
 
     ui->actionCancel->setDisabled(true);
     ui->actionIndexing_directory->setDisabled(true);
 
+    if (text_files.size() == 0) {
+        QMessageBox::information(this, "Information", "Text files not found", QMessageBox::Ok);
+        return;
+    }
+
+    ui->treeWidget->clear();
+    ui->treeWidget->hide();
+    ui->listWidget->show();
+
+
+    ui->patternLine->setEnabled(true);
+
+
+
     for (auto &file: text_files) {
         ui->listWidget->addItem(file.get_file_name());
     }
-
 }
 
 void MainWindow::go_home() {
@@ -272,4 +299,75 @@ void MainWindow::stop_searching() {
         break_search = true;
         watcher_for_search->waitForFinished();
     }
+}
+
+void MainWindow::show_pattern_in_file() {
+    if (ui->patternLine->text().size() == 0)
+        return;
+
+    if (ui->listWidget->currentItem()->text() == last_clicked_path) {
+        ui->textEdit->clear();
+        ui->textEdit->hide();
+        last_clicked_path = "";
+        return;
+    }
+
+
+
+     last_clicked_path = ui->listWidget->currentItem()->text();
+
+    if (watcher_for_search->isRunning())
+        return;
+
+    ui->textEdit->clear();
+
+
+    QFile file(last_clicked_path);
+
+    if (!file.open(QIODevice::ReadOnly)) {
+        QMessageBox::information(this, "Warning", QString("File %1 can't be opened").arg(file.fileName()), QMessageBox::Ok);
+        return;
+    }
+
+    if (file.size() > MAX_FILE_SIZE) {
+        QMessageBox::information(this, "Warning", QString("File %1 too large for opening").arg(file.fileName()), QMessageBox::Ok); // заглушка
+    } else {
+        ui->textEdit->setText(file.readAll());
+
+        QTextCursor cursor(ui->textEdit->document());
+        QTextCharFormat char_format;
+        char_format.setBackground(Qt::green);
+
+        QString text = ui->textEdit->toPlainText();
+        QString pattern = ui->patternLine->text();
+
+        int from = -1;
+        while (true) {
+            from = text.indexOf(pattern, from + 1);
+            if (from > 0) {
+                cursor.setPosition(from);
+                cursor.setPosition(from + pattern.length(), QTextCursor::KeepAnchor);
+                cursor.setCharFormat(char_format);
+            } else {
+                break;
+            }
+        }
+    }
+
+    ui->textEdit->show();
+}
+
+void MainWindow::double_tree_item_clicked() {
+    if (indexing_in_process && QMessageBox::question(this, "Attention", "Abort indexing?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+        return;
+    }
+
+    already_indexed = false;
+
+    auto path = ui->treeWidget->currentItem()->text(1);
+    auto dir = QFileInfo(path);
+    if (dir.isDir())
+        QDir::setCurrent(path);
+        show_directory(dir.filePath());
+    return;
 }

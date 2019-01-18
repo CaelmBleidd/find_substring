@@ -46,6 +46,8 @@ public:
     std::atomic_bool indexing_in_process;
     std::atomic_bool already_indexed;
 
+    static const int MAX_FILE_SIZE = 10 * 1024 * 1024;
+
 protected:
     void keyPressEvent(QKeyEvent *event);
 
@@ -55,7 +57,7 @@ public slots:
     void go_home();
     void show_current_directory();
     void change_indexing_status();
-
+    void double_tree_item_clicked();
     void change_max_value_progress_bar(qint64 value);
     void increase_progress_bar_value();
 
@@ -74,6 +76,11 @@ private:
     QFutureWatcher<void>* watcher_for_search;
 
     void search_pattern();
+
+    void show_pattern_in_file();
+
+    QString last_clicked_path;
+
 
 private slots:
     void select_directory();

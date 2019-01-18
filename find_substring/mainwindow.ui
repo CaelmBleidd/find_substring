@@ -71,7 +71,7 @@
       </column>
      </widget>
     </item>
-    <item row="3" column="0">
+    <item row="4" column="0">
      <widget class="QProgressBar" name="progressBar">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -83,6 +83,9 @@
        <number>24</number>
       </property>
      </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QListWidget" name="listWidget"/>
     </item>
     <item row="0" column="0">
      <layout class="QHBoxLayout" name="pathLayout">
@@ -127,7 +130,7 @@
       </item>
      </layout>
     </item>
-    <item row="4" column="0">
+    <item row="5" column="0">
      <layout class="QHBoxLayout" name="buttonsLayout">
       <item>
        <widget class="QPushButton" name="actionIndexing_directory">
@@ -159,8 +162,8 @@
       </item>
      </layout>
     </item>
-    <item row="1" column="0">
-     <widget class="QListWidget" name="listWidget"/>
+    <item row="3" column="0">
+     <widget class="QTextEdit" name="textEdit"/>
     </item>
    </layout>
   </widget>
