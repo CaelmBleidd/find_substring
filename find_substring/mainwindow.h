@@ -54,6 +54,10 @@ public slots:
     void show_file(Indexer const &);
     void go_home();
     void show_current_directory();
+    void change_indexing_status();
+
+    void change_max_value_progress_bar(qint64 value);
+    void increase_progress_bar_value();
 
 private:
     std::unique_ptr<Ui::MainWindow> ui;

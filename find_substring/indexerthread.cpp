@@ -13,6 +13,7 @@ void IndexerThread::process() {
 
         if (QThread::currentThread()->isInterruptionRequested()) {
             qDebug() << "Interruption requested";
+            emit change_status();
             emit show_home();
             emit finished();
             return;
@@ -21,7 +22,9 @@ void IndexerThread::process() {
         iter.next();
         files.push_back(Indexer(iter.filePath()));
     }
+
     qDebug() << QString("Vector size for indexing: %1").arg(files.size());
+    emit change_progress_max_value(files.size());
 
     qint64 count = 0;
     for (auto &file: files) {
@@ -29,6 +32,7 @@ void IndexerThread::process() {
 
         if (QThread::currentThread()->isInterruptionRequested()) {
             qDebug() << "Interruption requested";
+            emit change_status();
             emit show_home();
             break;
         }
@@ -39,6 +43,8 @@ void IndexerThread::process() {
         } else {
             qDebug() << QString("%1 wasn't indexed").arg(file.get_file_name());
         }
+
+        emit increase_progress_bar_status();
     }
     qDebug() << "Total indexed: " << count;
     files.erase(std::remove_if(files.begin(), files.end(), [](const Indexer &index){ return !index.is_text(); }), files.end());

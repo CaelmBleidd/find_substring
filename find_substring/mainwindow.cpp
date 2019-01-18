@@ -15,10 +15,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->actionCancel, &QPushButton::clicked, this, &MainWindow::cancel);
     connect(ui->actionChoose_directory, &QPushButton::clicked, this, &MainWindow::select_directory);
 
-
     connect(this, SIGNAL(add_file(Indexer const&)), this, SLOT(show_file(Indexer const&)));
 
     connect(ui->patternLine, &QLineEdit::textChanged, this, &MainWindow::pattern_line_has_changed);
+
+    ui->progressBar->setValue(0);
+    ui->progressBar->setMinimum(0);
 
     ui->listWidget->setStyleSheet("QListWidget { color: black }");
     ui->listWidget->hide();
@@ -126,6 +128,10 @@ void MainWindow::show_current_directory() {
     show_directory(QDir::currentPath());
 }
 
+void MainWindow::change_indexing_status() {
+    indexing_in_process = false;
+}
+
 void MainWindow::show_directory(QString const &dir) {
     ui->listWidget->clear();
     ui->listWidget->hide();
@@ -133,7 +139,10 @@ void MainWindow::show_directory(QString const &dir) {
     ui->treeWidget->show();
     ui->patternLine->clear();
 
-    indexing_in_process = false;
+    if (indexing_in_process)
+        cancel();
+
+    ui->progressBar->setValue(0);
 
     if (!already_indexed) {
         ui->patternLine->setDisabled(true);
@@ -164,6 +173,14 @@ void MainWindow::set_data(QTreeWidgetItem *item, QString const &path) {
     item->setText(1, file.filePath());
 }
 
+void MainWindow::change_max_value_progress_bar(qint64 value) {
+    ui->progressBar->setMaximum(value);
+}
+
+void MainWindow::increase_progress_bar_value() {
+    ui->progressBar->setValue(ui->progressBar->value() + 1);
+}
+
 void MainWindow::indexing() {
     ui->actionCancel->setEnabled(true);
     ui->actionIndexing_directory->setDisabled(true);
@@ -181,6 +198,14 @@ void MainWindow::indexing() {
 
     ui->actionCancel->setEnabled(true);
 
+    qRegisterMetaType<qint64>("qint64");
+    connect(indexer_thread, SIGNAL(change_progress_max_value(qint64)), this, SLOT(change_max_value_progress_bar(qint64)));
+    connect(indexer_thread, SIGNAL(increase_progress_bar_status()), this, SLOT(increase_progress_bar_value()));
+
+//            void change_progress_max_value(qint64);
+//            void increase_progress_bar_status();
+
+    connect(indexer_thread, SIGNAL(change_status()), this, SLOT(change_indexing_status()));
     connect(indexer_thread, SIGNAL(show_home()), this, SLOT(show_current_directory()));
 
     connect(indexer_thread, SIGNAL(finished()), thread_for_indexing, SLOT(quit()));
@@ -218,7 +243,6 @@ void MainWindow::go_home() {
     if (indexing_in_process && QMessageBox::question(this, "Attention", "Abort indexing?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
         return;
     }
-    indexing_in_process = false;
     already_indexed = false;
     cancel();
     QDir::setCurrent(QDir::homePath());
@@ -230,7 +254,6 @@ void MainWindow::go_back() {
     if (indexing_in_process && QMessageBox::question(this, "Attention", "Abort indexing?", QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
         return;
     }
-    indexing_in_process = false;
     already_indexed = false;
     cancel();
     QDir::setCurrent("..");

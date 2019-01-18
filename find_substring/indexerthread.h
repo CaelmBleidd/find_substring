@@ -28,6 +28,11 @@ signals:
     void show_files(QVector<Indexer>);
     void finished();
     void show_home();
+    void change_status();
+
+    void change_progress_max_value(qint64);
+    void increase_progress_bar_status();
+
 };
 
 #endif // INDEXERTHREAD_H
