@@ -34,10 +34,10 @@ SOURCES += \
 
 HEADERS += \
         mainwindow.h \
-    Indexer.h \
     searcher.h \
     indexerthread.h \
-    Tests/tests.h
+    Tests/tests.h \
+    indexer.h
 
 FORMS += \
         mainwindow.ui
