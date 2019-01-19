@@ -1,6 +1,8 @@
 #ifndef TESTS_H
 #define TESTS_H
 
+//#define QT_NO_DEBUG_OUTPUT
+
 #include <QObject>
 #include <QFile>
 #include <QTest>

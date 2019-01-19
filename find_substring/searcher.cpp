@@ -52,7 +52,7 @@ bool Searcher::find_substring(QString const &file_path) {
 //            auto q_line = QString().fromStdString(line);
 
         QString q_line = file.read(4194304);
-        if (q_line.indexOf(QString().fromStdString(pattern)) > 0)
+        if (q_line.indexOf(QString().fromStdString(pattern)) >= 0)
             return true;
     }
     return false;

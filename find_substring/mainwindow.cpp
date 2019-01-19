@@ -4,7 +4,7 @@
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow),
                                           watcher_for_search(new QFutureWatcher<void>(this)), already_indexed(false),
-                                          break_search(false), indexing_in_process(false) {
+                                          break_search(false), indexing_in_process(false){
 
     ui->setupUi(this);
 
@@ -21,9 +21,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->listWidget, &QListWidget::itemDoubleClicked, this, &MainWindow::show_pattern_in_file);
     connect(ui->treeWidget, &QTreeWidget::itemDoubleClicked, this, &MainWindow::double_tree_item_clicked);
 
+
     connect(this, SIGNAL(add_file(Indexer const&)), this, SLOT(show_file(Indexer const&)));
 
     connect(ui->patternLine, &QLineEdit::textChanged, this, &MainWindow::pattern_line_has_changed);
+
+    connect(&system_watcher, &QFileSystemWatcher::fileChanged, this, &MainWindow::file_has_changes);
+
+
 
     ui->progressBar->setValue(0);
     ui->progressBar->setMinimum(0);
@@ -105,14 +110,16 @@ void MainWindow::pattern_line_has_changed() {
     pattern = ui->patternLine->text().toStdString();
 
     if (pattern.empty()) {
-
         for (auto &file: text_files) {
             ui->listWidget->addItem(file.get_file_name());
         }
 
     }
 
-    if (pattern.size() < 3) return;
+    if (pattern.size() < 3) {
+//        ui->listWidget->clear();
+        return;
+    }
 
     if (watcher_for_search->isRunning()) {
         stop_searching();
@@ -168,6 +175,9 @@ void MainWindow::change_indexing_status() {
 }
 
 void MainWindow::show_directory(QString const &dir) {
+    system_watcher.removePaths(system_watcher.directories());
+    system_watcher.removePaths(system_watcher.files());
+
     ui->listWidget->clear();
     ui->listWidget->hide();
     ui->treeWidget->clear();
@@ -217,9 +227,15 @@ void MainWindow::increase_progress_bar_value() {
 }
 
 void MainWindow::indexing() {
+    text_files.clear();
     ui->actionCancel->setEnabled(true);
     ui->actionIndexing_directory->setDisabled(true);
 
+    if (system_watcher.directories().size() != 0)
+        system_watcher.removePaths(system_watcher.directories());
+
+    if (system_watcher.files().size() != 0)
+        system_watcher.removePaths(system_watcher.files());
 
     IndexerThread *indexer_thread = new IndexerThread(QDir::currentPath());
     thread_for_indexing = new QThread();
@@ -266,6 +282,8 @@ void MainWindow::after_indexing(QVector <Indexer> files) {
         return;
     }
 
+
+
     ui->treeWidget->clear();
     ui->treeWidget->hide();
     ui->listWidget->show();
@@ -273,14 +291,51 @@ void MainWindow::after_indexing(QVector <Indexer> files) {
 
     ui->patternLine->setEnabled(true);
 
+    ui->listWidget->clear();
 
+    system_watcher.addPath(QDir::currentPath());
 
     for (auto &file: text_files) {
         ui->listWidget->addItem(file.get_file_name());
+        system_watcher.addPath(file.get_file_path());
     }
 
     QMessageBox::information(this, "Result", QString("%1 text files found in %2 seconds").arg(text_files.size()).arg(time), QMessageBox::Ok);
 
+}
+
+void MainWindow::file_has_changes(QString const &path) {
+    if (watcher_for_search->isRunning())
+        return;
+    if (indexing_in_process)
+        return;
+
+    QFile file (path);
+
+    std::remove_if(text_files.begin(), text_files.end(), [path](Indexer &indexer) { return indexer.get_file_path() == path; } );
+
+    Indexer indexer(path);
+    indexer.process();
+
+    ui->patternLine->setText("");
+
+    if (indexer.is_text())
+        text_files.push_back(indexer);
+
+
+    ui->textEdit->clear();
+    for (auto &file: text_files) {
+        ui->listWidget->addItem(file.get_file_name());
+    }
+}
+
+void MainWindow::directory_has_changed(QString const &path) {
+    text_files.clear();
+    if (watcher_for_search->isRunning())
+        watcher_for_search->waitForFinished();
+    if (indexing_in_process)
+        cancel();
+    indexing();
 }
 
 void MainWindow::go_home() {

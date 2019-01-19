@@ -3,7 +3,7 @@
 
 //#define QT_NO_DEBUG_OUTPUT
 
-
+#include <QFileSystemWatcher>
 #include <QMainWindow>
 #include <QDir>
 #include <memory>
@@ -61,6 +61,9 @@ public slots:
     void change_max_value_progress_bar(qint64 value);
     void increase_progress_bar_value();
 
+    void directory_has_changed(QString const &path);
+    void file_has_changes(QString const &path);
+
 private:
     std::unique_ptr<Ui::MainWindow> ui;
     QDir actual_directory;
@@ -82,6 +85,8 @@ private:
     QString last_clicked_path;
 
     QTime timer;
+
+    QFileSystemWatcher system_watcher;
 
 
 private slots:
