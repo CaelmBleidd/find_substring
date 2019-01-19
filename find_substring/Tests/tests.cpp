@@ -10,7 +10,7 @@ void Tests::too_long_line()
     QFile file("long_line.tst");
     file.open(QFile::WriteOnly);
     for (auto i = 0; i < 2500; ++i)
-        file.write("aaaaaaaaaa");
+        file.write("lgdlgdlgdlgd");
     file.close();
     Indexer indexer("long_line.tst");
     indexer.process();
