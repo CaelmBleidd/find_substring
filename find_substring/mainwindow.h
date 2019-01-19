@@ -27,7 +27,7 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QTimer>
 
-#include "indexer.h"
+#include "Indexer.h"
 #include <indexerthread.h>
 
 namespace Ui {
