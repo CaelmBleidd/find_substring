@@ -133,5 +133,5 @@ QString Indexer::get_file_path() const {
 
 void Indexer::print_error(const QString &error) {
     is_ok = false;
-    qDebug() << error << "\n";
+    qDebug() << error;
 }

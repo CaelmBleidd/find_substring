@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     qRegisterMetaType<Indexer>("Indexer");
 
+    ui->textEdit->setReadOnly(true);
 
     connect(ui->actionIndexing_directory, &QPushButton::clicked, this, &MainWindow::indexing);
     connect(ui->actionGo_home, &QPushButton::clicked, this, &MainWindow::go_home);
@@ -227,7 +228,7 @@ void MainWindow::indexing() {
     connect(thread_for_indexing, SIGNAL(started()), indexer_thread, SLOT(process()));
 
     qRegisterMetaType < QVector < Indexer >> ("QVector<Indexer>");
-    connect(indexer_thread, SIGNAL(show_files(QVector < Indexer > )), this, SLOT(after_indexing(QVector < Indexer > )));
+    connect(indexer_thread, SIGNAL(show_files(QVector<Indexer>)), this, SLOT(after_indexing(QVector<Indexer> )));
 
     ui->actionCancel->setEnabled(true);
 
@@ -235,9 +236,6 @@ void MainWindow::indexing() {
     connect(indexer_thread, SIGNAL(change_progress_max_value(qint64)), this,
             SLOT(change_max_value_progress_bar(qint64)));
     connect(indexer_thread, SIGNAL(increase_progress_bar_status()), this, SLOT(increase_progress_bar_value()));
-
-//            void change_progress_max_value(qint64);
-//            void increase_progress_bar_status();
 
     connect(indexer_thread, SIGNAL(change_status()), this, SLOT(change_indexing_status()));
     connect(indexer_thread, SIGNAL(show_home()), this, SLOT(show_current_directory()));

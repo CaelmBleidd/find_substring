@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += testlib core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -29,16 +29,20 @@ SOURCES += \
         mainwindow.cpp \
     Indexer.cpp \
     searcher.cpp \
-    indexerthread.cpp
+    indexerthread.cpp \
+    Tests/tests.cpp
 
 HEADERS += \
         mainwindow.h \
     Indexer.h \
     searcher.h \
-    indexerthread.h
+    indexerthread.h \
+    Tests/tests.h
 
 FORMS += \
         mainwindow.ui
+
+SUBDIRS += Tests
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
